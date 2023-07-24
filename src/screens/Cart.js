@@ -16,6 +16,31 @@ export default function Cart(){
     )
   }
 
+  // const handlePayment=async()=>{
+  //   await fetch("http://localhost:5000/api/payment", {
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //     body: JSON.stringify({
+  //       items: [
+  //         { id: 1, quantity: 3 },
+  //         { id: 2, quantity: 1 },
+  //       ],
+  //     }),
+  //   })
+  //     .then(res => {
+  //       if (res.ok) return res.json()
+  //       return res.json().then(json => Promise.reject(json))
+  //     })
+  //     .then(({ url }) => {
+  //       window.location = url
+  //     })
+  //     .catch(e => {
+  //       console.error(e.error)
+  //     })
+  // }
+
   const handleCheckOut=async()=>{
     let userEmail=localStorage.getItem("userEmail");
     const response = await fetch("http://localhost:5000/api/orderData",{
@@ -33,6 +58,29 @@ export default function Cart(){
     if(response.status===200){
         dispatch({type:"DROP"})
     }
+
+    await fetch("http://localhost:5000/api/payment", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        items: [
+          { id: 1, quantity: 3 },
+          { id: 2, quantity: 1 },
+        ],
+      }),
+    })
+      .then(res => {
+        if (res.ok) return res.json()
+        return res.json().then(json => Promise.reject(json))
+      })
+      .then(({ url }) => {
+        window.location = url
+      })
+      .catch(e => {
+        console.error(e.error)
+      })
   }
 
   let totalPrice = data.reduce((total, food) => total + food.price, 0)
@@ -63,6 +111,11 @@ export default function Cart(){
           </tbody>
         </table>
         <div><h1 className='fs-2'>Total Price: {totalPrice}/-</h1></div>
+        
+        {/* <div>
+          <button className='btn bg-success mt-5 ' onClick={handlePayment} > Pay </button>
+        </div> */}
+
         <div>
           <button className='btn bg-success mt-5 ' onClick={handleCheckOut} > Check Out </button>
         </div>

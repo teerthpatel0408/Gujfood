@@ -79,6 +79,39 @@ async function sendMail(mail){
 //         res.status(500).json({ error: error.message })
 //     }
 // })
+const stripe = require("stripe")(process.env.STRIPE_PRIVATE_KEY)
+
+const storeItems = new Map([
+  [1, { priceInCents: 10000, name: "Pizza" }],
+  [2, { priceInCents: 20000, name: "Sweat" }],
+])
+
+router.post("/payment", async (req, res) => {
+    try {
+      const session = await stripe.checkout.sessions.create({
+        success_url: 'https://www.beauty-addict.com/wp-content/uploads/2021/02/Payment-success.png',
+        payment_method_types: ["card"],
+        mode: "payment",
+        line_items: req.body.items.map(item => {
+          const storeItem = storeItems.get(item.id)
+          return {
+            price_data: {
+              currency: "usd",
+              product_data: {
+                name: storeItem.name,
+              },
+              unit_amount: storeItem.priceInCents,
+            },
+            quantity: item.quantity,
+          }
+        }),
+      
+      })
+      res.json({ url: session.url })
+    } catch (e) {
+      res.status(500).json({ error: e.message })
+    }
+  })
 
 router.post('/orderData', async (req, res) => {
     let data = req.body.order_data
